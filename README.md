@@ -7,76 +7,80 @@ To write a program to predict the price of the house and number of occupants in 
 1. Hardware – PCs
 2. Anaconda – Python 3.7 Installation / Jupyter notebook
 
-## Algorithm:
-Step-1.Start
-Step-2.Data Preparation
-3.Hypothesis Definition
-4.Cost Function
-5.Parameter Update Rule
-6.Iterative Training
-7.Model Evaluation
-8.End 
+## Algorithm
+1. **Import Libraries**: Import necessary libraries, including `numpy`, `pandas`, `matplotlib`, `SGDRegressor`, `MultiOutputRegressor`, `train_test_split`, `mean_squared_error`, and `StandardScaler`.
+
+2. **Load Dataset**: Use `fetch_california_housing()` to load the California Housing dataset.
+
+3. **Select Features and Target Variables**: Extract the first three features (`X`) and define the target (`Y`) by stacking the house price (`data.target`) and number of occupants (feature at index 6).
+
+4. **Split Data into Training and Testing Sets**: Split the input data (`X`) and output data (`Y`) into training and testing sets using `train_test_split()`.
+
+5. **Scale the Data**: Use `StandardScaler` to scale both input features (`X_train` and `X_test`) and the target variables (`Y_train` and `Y_test`) for better performance of the gradient-based optimization algorithm.
+
+6. **Initialize SGD Regressor**: Create an instance of `SGDRegressor` with parameters such as `max_iter` for maximum iterations and `tol` as tolerance.
+
+7. **MultiOutput Regressor**: Wrap the `SGDRegressor` model using `MultiOutputRegressor` to handle multiple output variables simultaneously.
+
+8. **Train the Model**: Fit the model to the scaled training data (`X_train` and `Y_train`).
+
+9. **Predict on Test Data**: Use the trained model to predict on the scaled test set (`X_test`).
+
+10. **Inverse Transform and Evaluate**: Inverse-transform the predictions and actual values to their original scale. Calculate the **Mean Squared Error (MSE)** between the predicted and actual values.
+
+11. **Display Results**: Print the Mean Squared Error and the first 5 predicted values for house prices and the number of occupants.
 
 ## Program:
 ```
+/*
 Program to implement the multivariate linear regression model for predicting the price of the house and number of occupants in the house with SGD regressor.
-
 Developed by: Naveenaa A K
-RegisterNumber:  212223230094
+RegisterNumber:  212222230094
+*/
 ```
-```
+
+```PYTHON
+import numpy as np
 import pandas as pd
-data=pd.read_csv("C:/Users/Admin/Desktop/Placement_Data.csv")
-data.head()
-data1=data.copy()
-data1=data1.drop(["sl_no","salary"],axis=1)
-data1.head()
-data1.isnull()
-data1.duplicated().sum()
-from sklearn.preprocessing import LabelEncoder
-le=LabelEncoder()
-data1["gender"]=le.fit_transform(data1["gender"])
-data1["ssc_b"]=le.fit_transform(data1["ssc_b"])   
-data1["hsc_b"]=le.fit_transform(data1["hsc_b"])
-data1["hsc_s"]=le.fit_transform(data1["hsc_s"])
-data1["degree_t"]=le.fit_transform(data1["degree_t"])
-data1["workex"]=le.fit_transform(data1["workex"])
-data1["specialisation"]=le.fit_transform(data1["specialisation"])
-data1["status"]=le.fit_transform(data1["status"])
-data1
-x=data1.iloc[:,:-1]
-x
-y=data1["status"]
-y
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_california_housing
+from sklearn.linear_model import SGDRegressor
+from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import train_test_split
-x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=0)
-from sklearn.linear_model import LogisticRegression
-lr=LogisticRegression(solver="liblinear")
-lr.fit(x_train,y_train)
-y_pred=lr.predict(x_test)
-y_pred
-from sklearn.metrics import accuracy_score
-accuracy=accuracy_score(y_test,y_pred)
-accuracy
-from sklearn.metrics import classification_report
-classification_report1=classification_report(y_test,y_pred)
-print(classification_report1)
-lr.predict([[1,80,1,90,1,1,90,1,0,85,1,85]])
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import StandardScaler
+
+data = fetch_california_housing()
+X = data.data[:, :3]
+Y = np.column_stack((data.target,data.data[:,6]))
+X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
+scaler_X = StandardScaler()
+scaler_Y = StandardScaler()
+
+X_train = scaler_X.fit_transform(X_train)
+X_test = scaler_X.transform(X_test)
+Y_train = scaler_Y.fit_transform(Y_train)
+Y_test = scaler_Y.transform(Y_test)
+
+sgd = SGDRegressor(max_iter = 1000, tol = 1e-3)
+
+multi_output_regressor = MultiOutputRegressor(sgd)
+multi_output_regressor.fit(X_train,Y_train)
+
+#predict on test data
+Y_pred = multi_output_regressor.predict(X_test)
+
+Y_test = scaler_Y.inverse_transform(Y_test)
+Y_pred = scaler_Y.inverse_transform(Y_pred)
+
+mse = mean_squared_error(Y_test,Y_pred)
+print(f"Mean Squared Error: {mse}")
+
+print("\nPredicted Values:",Y_pred[:5])
 ```
 
 ## Output:
-```
-y_pred
-```
-![4-1](https://github.com/user-attachments/assets/b9077ea6-8687-4cd6-b394-e3bdd6e8ee9f)
-```
-print(classification_report1)
-```
-![4-2](https://github.com/user-attachments/assets/60ff1356-4819-4f0b-8b98-c35b171f9def)
-```
-lr.predict([[1,80,1,90,1,1,90,1,0,85,1,85]])
-```
-![4-3](https://github.com/user-attachments/assets/c8b3c093-c11f-4bd5-ba1e-0c3001fc12f0)
+![Screenshot 2024-09-05 215002](https://github.com/user-attachments/assets/dae860d2-b4c3-4619-8c09-43a6c00e3d7e)
 
 
 ## Result:
